@@ -7,17 +7,29 @@ NUM_ALPHABET = 26
 
 class AffinityHierarchicalClustering:
     def __init__(self, data, k_anonymous, vectorize_type):
+        """
+        :param data: a dataframe with user_id, visit_domain columns
+        :param k_anonymous: k_anonymous: minimum size of cohorts should be bigger than k
+        :param vectorize_type: word vectorize method, support OneHot Encoding, Count Vectorizer, TfIdf Vectorizer
+        :raises ValueError: if k_anonymous is too large
+        :raises ValueError: if number of unique words is bigger than 26 words. It will be updated soon.
+        """
+
         self.data = data
         self.k_anonymous = k_anonymous
         self.vectorize_type = vectorize_type
 
         if k_anonymous > len(data)/2:
             raise ValueError("anonimity k is too high to clustering input data. maximum value is half of num of users")
+
         num_unique_words = len(set(" ".join(data['visit_domain']).split(" ")))
         if num_unique_words > NUM_ALPHABET:
             raise ValueError("Now only supported for maximum 26 unique words. It will be updated soon sry.")
 
     def graph_construction(self):
+        """ Construct user-user similarity graph. Nodes belongs to user, Edges belongs to cosine similarity
+        :return: user_similarity graph
+        """
         vectorized_data = word_vectorize(self.data['visit_domain'], self.vectorize_type)
         user_simgraph = linear_kernel(vectorized_data, vectorized_data)
         return user_simgraph
@@ -27,6 +39,10 @@ class AffinityHierarchicalClustering:
         return max(cohort_similarity, key=cohort_similarity.get)
 
     def cal_agglomerative_clustering(self, user_similarity_graph):
+        """ agglomerative clustering with average linkage. When each cohort's satisfied k-anonimity, stop clustering.
+        :param user_similarity_graph:
+        :return: space of cohorts
+        """
         user_similarity, now_cohort_similarity, now_cohort_space, final_cohort_space = {}, {}, {}, {}
 
         for idx1, user1 in enumerate(user_similarity_graph):
@@ -103,20 +119,14 @@ if __name__ == '__main__':
         'trip eat shoes shoes cloth shoes',
         'park hotel hotel hotel hotel abroad',
     ]
-
     user_data = pd.DataFrame(
         {'user_id': ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
          'visit_domain': text}
     )
+    
     clustering_res = AffinityHierarchicalClustering(
         data=user_data,
         k_anonymous=3,
         vectorize_type='TfIdf',
     )
-
     print(clustering_res.run())
-
-
-
-
-
