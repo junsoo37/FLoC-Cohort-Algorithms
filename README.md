@@ -1,5 +1,7 @@
 # FLoC-Cohort-Algorithms
-Development of three cohort algorithms in Google's Federated Learning of Cohorts(FLoC) whitepaper. (SimHash, SortingLSH, Affinity hierarical clustering)
+Development of three cohort algorithms in Google's Federated Learning of Cohorts(FLoC) based on FLoC whitepaper. 
+(SimHash, SortingLSH, Affinity hierarical clustering)
+
 In FLoC, calculating cohort ids of users based on their browsing history.
 
 Reference
